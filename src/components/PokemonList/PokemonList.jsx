@@ -16,7 +16,7 @@ function PokemonList() {
     setIsDownload(true);
     const response = await axios.get(PokedexUrl);
     const pokemonResults = response.data.results;
-    console.log(response);
+    
 
     setNextUrl(response.data.next);
     setPrevUrl(response.data.previous);
@@ -29,7 +29,7 @@ function PokemonList() {
       const pokemon = pokemonData.data;
       return {
         name: pokemon.name,
-        image: pokemon.sprites.back_shiny,
+        image: pokemon.sprites.other.dream_world.front_default,
         id: pokemon.id,
       };
     });
@@ -46,12 +46,12 @@ function PokemonList() {
 
   return (
     <div className="List-Wrapper">
-      <div className="headings">Pokemon List</div>
+      <div className="heading">Pokemon List</div>
       <div className="All-Pokemon-List">
         {isDownload
-          ? "...Loading"
+          ? <h3 className="loading">...Loading</h3>
           : pokemonList.map((p) => (
-              <Pokemon name={p.name} image={p.image} id={p.id} />
+              <Pokemon name={p.name} image={p.image} key={p.id} id={p.id} />
             ))}
       </div>
       <div className="controls">

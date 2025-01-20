@@ -1,11 +1,17 @@
 import Search from "../Search/Search";
-import "./pokedex.css"
+import "./pokedex.css";
+import PokemonList from "../PokemonList/PokemonList";
 function Pokedex() {
   return (
+    <>
     <div className="pokedex">
-      <h1>POKEDEX</h1>
+      
       <Search />
+      
     </div>
+    <PokemonList />
+    </>
+    
   );
 }
 export default Pokedex;
