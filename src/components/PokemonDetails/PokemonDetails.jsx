@@ -2,7 +2,7 @@ import "./pokemonDetails.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-
+import usePokemonList from "../../hooks/pokemonListHookh";
 
 function PokemonDetails() {
   const [pokemon, setPokemon] = useState({});
@@ -10,6 +10,7 @@ function PokemonDetails() {
   async function downloadPokemon() {
     const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
     const pokemondata = response.data;
+
     const pokeDetails = {
       image: pokemondata.sprites.other.dream_world.front_default,
       name: pokemondata.name,
@@ -20,11 +21,16 @@ function PokemonDetails() {
     setPokemon(pokeDetails);
   }
 
+  const [pokemonListState] = usePokemonList(
+    `https://pokeapi.co/api/v2/type/${
+      pokemon.types ? pokemon.types[0] : "fire"
+    }`,
+    true
+  );
+
   useEffect(() => {
     downloadPokemon();
   }, []);
-
-
 
   return (
     <div className="pokemon-detail-wrapper">
@@ -38,9 +44,20 @@ function PokemonDetails() {
         {pokemon.types &&
           pokemon.types.map((ele) => <div key={ele}>{ele}</div>)}
       </div>
+
+      {pokemon.types && (
+        <div className="similarTypes">
+          <h1>More {pokemon.types[0]} type pokemons</h1>
+          <ul>
+            {pokemonListState.pokemonList &&
+              pokemonListState.pokemonList.map((p) => (
+                <li key={p.pokemon.url}>{p.pokemon.name}</li>
+              ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
-
 
 export default PokemonDetails;
