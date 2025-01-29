@@ -2,31 +2,63 @@ import "./pokemonDetails.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import usePokemonList from "../../hooks/pokemonListHookh";
+import SimilarPokemons from "./SimilarPokemons";
 
-function PokemonDetails() {
+function PokemonDetails({ pokemonName }) {
   const [pokemon, setPokemon] = useState({});
   const { id } = useParams();
+
+  // const [hasData, setHasData] = useState(false);
+  const [reqInfo, setReqInfo] = useState({
+    error: false,
+    loading: true,
+  });
+
   async function downloadPokemon() {
-    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    const pokemondata = response.data;
+    let response;
+    try {
+      if (pokemonName) {
+        response = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon/${pokemonName}`,
+          {
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
+            },
+          }
+        );
+      } else {
+        response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
+      }
 
-    const pokeDetails = {
-      image: pokemondata.sprites.other.dream_world.front_default,
-      name: pokemondata.name,
-      height: pokemondata.height,
-      weight: pokemondata.weight,
-      types: pokemondata.types.map((ele) => ele.type.name),
-    };
-    setPokemon(pokeDetails);
+      if (response.status !== 200) {
+        throw `Invalid Status Code`;
+      }
+
+      const pokemondata = response.data;
+
+      const pokeDetails = {
+        image: pokemondata.sprites.other.dream_world.front_default,
+        name: pokemondata.name,
+        height: pokemondata.height,
+        weight: pokemondata.weight,
+        types: pokemondata.types.map((ele) => ele.type.name),
+      };
+      setPokemon(pokeDetails);
+      setReqInfo((x) => ({ ...x, loading: false, error: false }));
+    } catch (e) {
+      console.log(e);
+
+      setReqInfo((x) => ({ ...x, loading: false, error: true }));
+    }
   }
-
-  const [pokemonListState] = usePokemonList(
-    `https://pokeapi.co/api/v2/type/${
-      pokemon.types ? pokemon.types[0] : "fire"
-    }`,
-    true
-  );
 
   useEffect(() => {
     downloadPokemon();
@@ -44,17 +76,10 @@ function PokemonDetails() {
         {pokemon.types &&
           pokemon.types.map((ele) => <div key={ele}>{ele}</div>)}
       </div>
-
-      {pokemon.types && (
-        <div className="similarTypes">
-          <h1>More {pokemon.types[0]} type pokemons</h1>
-          <ul>
-            {pokemonListState.pokemonList &&
-              pokemonListState.pokemonList.map((p) => (
-                <li key={p.pokemon.url}>{p.pokemon.name}</li>
-              ))}
-          </ul>
-        </div>
+      {reqInfo.loading && <>...loading Pokemon Details</>}
+      {!reqInfo.loading && reqInfo.error && <>Error! Something Wrong </>}
+      {!reqInfo.loading && !reqInfo.error && (
+        <SimilarPokemons pokemonType={pokemon.types[0]} />
       )}
     </div>
   );

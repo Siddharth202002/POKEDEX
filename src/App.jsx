@@ -8,7 +8,7 @@ function App() {
       <div className="heading">
         
          <Link to ='/'>
-         <h1 className="pokedex-heading" >POKEDEX</h1>
+         <h1 className="pokedex-heading" onClick={()=><CustomRoutes/>}>POKEDEX</h1>
         
         </Link>
        
